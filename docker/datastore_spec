@@ -1,0 +1,15 @@
+{
+    "mounts": [
+        {
+            "bucket": "gcda-ipfs-ds-gcs",
+            "mountpoint": "/blocks",
+            "prefix": "ipfs"
+        },
+        {
+            "mountpoint": "/",
+            "path": "datastore",
+            "type": "levelds"
+        }
+    ],
+    "type": "mount"
+}

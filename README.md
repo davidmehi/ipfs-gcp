@@ -1,13 +1,25 @@
 # ipfs-gcp
 Deploy IPFS to GCP
 
-## Hardcoded values
+This script will create a docker image of a IPFS (kubo) node that is configured to use the [go-ds-gcs](github.com/ipfs-shipyard/go-ds-gcs) plugin.  This will store the backend files in a google cloud storage bucket.  Normally an IPFS node is backed by the local filesystem.  But this plugin will save the data to a storage bucket instead.  
 
+I had trouble getting the (Dockerfile)[https://github.com/ipfs-shipyard/go-ds-gcs/tree/master/docker] in the `go-ds-gcs` project to work, so I borrowed the Dockerfile from the (go-ds-s3)[https://github.com/ipfs/go-ds-s3] project, which `go-ds-gcs` is based on.
+
+The idea is that it will build the plugin and the IPFS code on a `golang` docker image.  Then using an IPFS docker image, it will replace the IPFS binaries with the newly built IPFS binaries.  
+
+THe way the plugin works is that the IPFS node is first initialized with the `ipfs init` command, which also creates the config file.  Then the config file is modified to add the GCS bucket information.  The node is then started with the `ipfs daemon` command.  I've had issues modifying the config file dynamically at container boot time.  And the dependency libraries did not load properly in some cases.
+
+The alternative is to pre-configure the config file and load the config file into the container.  This means you need to create the config beforehand, and then load it in the container.  This does not make the container re-usable since you are preloading the node config, so the container image is meant for one specific node.  So you have to build an image for each node. This is not ideal, and there probably is a way around this issue, like how the go-ds-s3 does it.  However, I ran out of time to find an alternative
+
+ 
+
+## Hardcoded values
+With the config, the storage bucket is hardcoded.  You may be able to substitute it with an environmental variable
 
 Dockerfile
 
 ```
-ENV KUBO_GCS_BUCKET=gcda-ipfs-ds-gcs
+ENV KUBO_GCS_BUCKET=my-ipfs-ds-gcs
 ```
 
 config
@@ -22,7 +34,7 @@ Datastore.Spec.mounts[0].child.bucket
       "mounts": [
         {
           "child": {
-            "bucket": "gcda-ipfs-ds-gcs",
+            "bucket": "my-ipfs-ds-gcs",
             "cachesize": 40000,
             "prefix": "ipfs",
             "type": "gcsds",
@@ -57,7 +69,7 @@ mounts.bucket
 {
     "mounts": [
         {
-            "bucket": "gcda-ipfs-ds-gcs",
+            "bucket": "my-ipfs-ds-gcs",
             "mountpoint": "/blocks",
             "prefix": "ipfs"
         },
@@ -158,5 +170,5 @@ sudo sysctl -w net.core.wmem_max=7500000
 
 ipfs daemon
 
-KUBO_GCS_BUCKET=gcda-ipfs-ds-gcs ipfs init --profile gcsds
+KUBO_GCS_BUCKET=my-ipfs-ds-gcs ipfs init --profile gcsds
 

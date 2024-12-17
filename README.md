@@ -104,7 +104,7 @@ docker logs ipfs
 
 
 ## Test Docker container
-
+```
 echo "Hello IPFS4" > /data/content/hello4.txt
 ipfs add hello4.txt
 ipfs cat {hash}
@@ -119,21 +119,23 @@ docker exec -it ipfs ipfs files read hello5.txt
 docker exec -it ipfs ipfs ls /data/content/
 
 docker exec -it ipfs ipfs get {hash}
-
-
+```
 
 ## Publish to GCP Arififact Registry
 
+```
 docker tag ipfs:v0.30.0-gcs us-central1-docker.pkg.dev/gcda-dev/gcda-dev-ipfs/ipfs:v0.30.0-gcs
 docker push us-central1-docker.pkg.dev/gcda-dev/gcda-dev-ipfs/ipfs:v0.30.0-gcs
-
+```
 
 
 
 ## GCP Service account
 
+```
 create service account ipfs
 Add role for Cloud Storage read/write
+```
 
 # Changes to go.mod
 
@@ -148,6 +150,7 @@ remove (lines 245-246)
 
 Add these three
 
+```
 ADD_LINE="google.golang.org/api v0.122.0 // indirect \
 google.golang.org/appengine v1.6.8 // indirect \
 google.golang.org/genproto v0.0.0-20230410155749-daa745c078e1 // indirect"
@@ -160,10 +163,12 @@ Update mimetype version
 
 github.com/gabriel-vasile/mimetype v1.4.4 // indirect
 github.com/gabriel-vasile/mimetype v1.4.6 // indirect
-
+```
 
 
 # Binary - Initialize
+
+```
 ipfs init
 sudo sysctl -w net.core.rmem_max=7500000
 sudo sysctl -w net.core.wmem_max=7500000
@@ -171,4 +176,4 @@ sudo sysctl -w net.core.wmem_max=7500000
 ipfs daemon
 
 KUBO_GCS_BUCKET=my-ipfs-ds-gcs ipfs init --profile gcsds
-
+```
